@@ -49,6 +49,21 @@ app.get("/houses/:id", async (req, res) => {
     }
 })
 
+//get a random house
+
+app.get("/houses/random/:id", async (req, res) => {
+    try {
+        const { id } = req.params
+        const house = await pool.query("SELECT * FROM house WHERE house_id != $1 ORDER BY RANDOM() LIMIT 1",
+            [id]);
+        res.json(house.rows[0])
+
+    }
+    catch (err) {
+        console.error(err.message);
+    }
+})
+
 //update a house
 
 app.put("/houses/:id", async (req, res) => {
@@ -56,7 +71,7 @@ app.put("/houses/:id", async (req, res) => {
         const { id } = req.params;
         const { elo } = req.body;
 
-        const percent = ((elo / 1600) / 20) + 1
+        const percent = (((elo / 1600) - 1) / 4) + 1
         const updateHouse = await pool.query("UPDATE house SET elo = $1, percent = $2 WHERE house_id = $3",
             [elo, percent, id]);
         res.json("HOUSE UPDATED");
@@ -72,6 +87,8 @@ app.put("/houses/:id", async (req, res) => {
 //create a match
 
 app.post("/matches", async (req, res) => {
+
+
     try {
         const { first_house_id,
             second_house_id,
@@ -117,6 +134,9 @@ app.get("/matches/:houseId", async (req, res) => {
         console.error(err.message);
     }
 })
+
+
+//get random house id's for a match
 
 app.listen(5000, () => {
     console.log("SERVER IS RUNNING on 5000");

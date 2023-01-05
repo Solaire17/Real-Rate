@@ -9,6 +9,11 @@ const CreateMatches = () => {
     const [firstHouseElo, setFirstHouseElo] = useState([]);
     const [secondHouseElo, setSecondHouseElo] = useState([]);
 
+    //instead of everything above
+    //make the UI and stuff and instead pass in the id from another component 
+    //then use that id to make one get call to get a random elo
+    //then put it into the elo api
+
 
     //get function 1
     const getFirstElo = async (id: any) => {
