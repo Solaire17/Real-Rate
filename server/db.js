@@ -3,7 +3,7 @@ const DATABASE_PASSWORD = process.env.DATABASE_PASSWORD
 
 const pool = new Pool({
     user: "postgres",
-    password: DATABASE_PASSWORD,
+    password: "",
     host: "localhost",
     port: 5432,
     database: "realrate"
