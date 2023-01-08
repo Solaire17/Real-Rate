@@ -1,39 +1,123 @@
+import { match } from "assert";
 import React, { useState, useEffect } from "react";
 
+var EloRating = require('elo-rating');
 
-const CreateMatches = () => {
-    //1. DONE Get Elo of both matches and sets them in the states below
-    //2. COnfigure the Routes in the backend so it is completely random 2
-    //3. Use the API and compare and then update them
-    //4. Have to configure the house route for updating
-    const [firstHouseElo, setFirstHouseElo] = useState([]);
-    const [secondHouseElo, setSecondHouseElo] = useState([]);
+interface IMatches {
+    firstHouseId: number,
+    secondHouseId: number,
+    firstOldElo: number, 
+    secondOldElo: number,
+    firstNewElo: number,
+    secondNewElo: number, 
+    status: boolean,
+}
 
-    //instead of everything above
-    //make the UI and stuff and instead pass in the id from another component 
-    //then use that id to make one get call to get a random elo
-    //then put it into the elo api
+const CreateMatches = (house: any) => {
+    const [id, setId] = useState(house.house_id)
+
+    const [match, setMatch] = useState({
+        firstHouseId: 0,
+        secondHouseId: 0,
+        firstOldElo: 0, 
+        secondOldElo: 0,
+        firstNewElo: 0,
+        secondNewElo: 0, 
+        status: false
+    });
+
+    const [result, setResult] = useState()
+
+    const [secondHouseElo, setSecondHouseElo] = useState();
 
 
     //get function 1
-    const getFirstElo = async (id: any) => {
+    async function getElos(id: number) {
         try {
-            const response = await fetch(`http://localhost:5000/house/${id}`)
+            const response = await fetch(`http://localhost:5000/houses/${id}`)
             const jsonData = await response.json()
 
-            setFirstHouseElo(jsonData);
+            setMatch((prevMatchData: IMatches) => {
+                return {
+                  ...prevMatchData,
+                  firstHouseId: jsonData.house_id,
+                  firstOldElo: jsonData.elo
+                };
+              });
+            console.log(match)
+        } catch (err: any) {
+            console.error(err.message);
+        }
+        try {
+            const response = await fetch(`http://localhost:5000/houses/random/${id}`)
+            const jsonData = await response.json()
+
+            setMatch((prevMatchData: IMatches) => {
+                return {
+                  ...prevMatchData,
+                  secondHouseId: jsonData.house_id,
+                  secondOldElo: jsonData.elo
+                };
+              });
+            console.log(match)
         } catch (err: any) {
             console.error(err.message);
         }
     }
 
-    //get function 2
-    const getSecondElo = async (id: any) => {
+    async function addMatch() {
         try {
-            const response = await fetch(`http://localhost:5000/house/${id}`)
-            const jsonData = await response.json()
+            const body = { match };
+            const response = await fetch("http://localhost:5000/matches", {
+                method: "POST",
+                headers: { "Content-Type": "application/json"},
+                body: JSON.stringify(body)
+            });
+        } catch (err: any) {
+            console.error(err.message)
+        }
+    }
 
-            setSecondHouseElo(jsonData);
+    function calculateResult(result: boolean) {
+        console.log(match.firstOldElo, match.secondOldElo)
+        var resultInfo = EloRating.calculate(match.firstOldElo, match.secondOldElo, result);
+        console.log(resultInfo)
+        
+        setMatch((prevMatchData: IMatches) => {
+            return {
+              ...prevMatchData,
+              firstNewElo: resultInfo.playerRating,
+              secondNewElo: resultInfo.opponentRating,
+              status: result
+            };
+          });
+
+          addMatch();
+          updateElo();
+    }
+
+    async function updateElo() {
+        const { 
+            firstHouseId, 
+            secondHouseId,
+            firstNewElo, 
+            secondNewElo, 
+            status
+        } = match
+
+        try {
+            const body = {
+                firstHouseId, 
+                secondHouseId,
+                firstNewElo, 
+                secondNewElo, 
+                status}
+            const response = await fetch('http://localhost:5000/matchResult', {
+                method: "PUT",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify(body)
+            })
+
         } catch (err: any) {
             console.error(err.message);
         }
@@ -41,7 +125,16 @@ const CreateMatches = () => {
 
     return (
         <div>
-
+            <button onClick={() => {
+                    getElos(id)
+                    //make modal pop up here
+            }}>Add</button>
+            <button onClick={() => {
+                calculateResult(true)
+            }}>Left</button>
+            <button onClick={() => {
+                calculateResult(false)
+            }}>Right</button>
         </div>
     )
 }

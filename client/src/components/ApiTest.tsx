@@ -9,12 +9,12 @@ var EloRating = require('elo-rating');
 export default function ApiTest() {
  
     var playerWin = false;
-    var result = EloRating.calculate(1750, 1535, playerWin);
+    var result = EloRating.calculate(1600, 1600, playerWin);
      
-    console.log((result.playerRating/16000)) // Output: 1735
-    console.log(result.opponentRating/16000) // Output: 1550
+    console.log((result.playerRating)) // Output: 1735
+    console.log(result.opponentRating) // Output: 1550
      
-    result = EloRating.calculate(1750, 1535);
+    result = EloRating.calculate(1600, 1600, true);
      
     console.log(result.playerRating) // Output: 1754
     console.log(result.opponentRating) // Output: 1531
