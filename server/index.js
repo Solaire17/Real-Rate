@@ -2,10 +2,12 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 const pool = require("./db");
-const Redis = require("redis")
+const Redis = require("redis");
+const { json } = require("express");
 
+const redisClient = Redis.createClient()
 
-const client = Redis.createClient()
+const EXPIRATION = 3600
 
 app.use(cors());
 app.use(express.json());
@@ -34,8 +36,11 @@ app.post("/houses", async (req, res) => {
 
 app.get("/houses", async (req, res) => {
     try {
-        const allHouses = await pool.query("SELECT * FROM house");
-        res.json(allHouses.rows)
+    const houses = await getOrSetCache("houses", async () => {
+        const allHouses  = await pool.query("SELECT * FROM house");
+        return allHouses
+    })
+    res.json(houses.rows)
     }
     catch (err) {
         console.error(err.message);
@@ -47,9 +52,12 @@ app.get("/houses", async (req, res) => {
 app.get("/houses/:id", async (req, res) => {
     try {
         const { id } = req.params
-        const house = await pool.query("SELECT * FROM house WHERE house_id = $1",
+        const houses = await getOrSetCache(`houses:${id}`, async () => {
+            const house = await pool.query("SELECT * FROM house WHERE house_id = $1",
             [id]);
-        res.json(house.rows[0])
+            return house
+        })
+        res.json(houses.rows[0])
     }
     catch (err) {
         console.error(err.message);
@@ -64,7 +72,6 @@ app.get("/houses/random/:id", async (req, res) => {
         const house = await pool.query("SELECT * FROM house WHERE house_id != $1 ORDER BY RANDOM() LIMIT 1",
             [id]);
         res.json(house.rows[0])
-
     }
     catch (err) {
         console.error(err.message);
@@ -121,12 +128,15 @@ app.post("/matches", async (req, res) => {
 
 app.get("/matches", async (req, res) => {
     try {
-        const allMatches = await pool.query("SELECT * FROM match");
-        res.json(allMatches.rows)
-    }
-    catch (err) {
-        console.error(err.message);
-    }
+        const matches = await getOrSetCache("matches", async () => {
+            const allMatches = await pool.query("SELECT * FROM match");
+            return allMatches
+        })
+        res.json(matches.rows)
+        }
+        catch (err) {
+            console.error(err.message);
+        }
 })
 
 //get all matches matching an id
@@ -134,14 +144,31 @@ app.get("/matches", async (req, res) => {
 app.get("/matches/:houseId", async (req, res) => {
     try {
         const { houseId } = req.params
-        const match = await pool.query("SELECT * FROM match WHERE $1 IN(first_house_id, second_house_id)",
+        const matches = await getOrSetCache(`matches:${houseId}`, async () => {
+            const match = await pool.query("SELECT * FROM match WHERE $1 IN(first_house_id, second_house_id)",
             [houseId]);
-        res.json(match.rows)
+            return match
+        })
+        res.json(matches.rows)
     }
     catch (err) {
         console.error(err.message);
     }
 })
+
+//Redis Function
+
+function getOrSetCache(key, callback) {
+    return new Promise((resolve, reject) => {
+        redisClient.get(key, async (error, data) => {
+            if (error) return reject(error)
+            if (data !=null) return resolve(JSON.parse(data))
+            const newData = await callback()
+            redisClient.setex(key, EXPIRATION, JSON.stringify(newData))
+            resolve(newData)
+        })
+    })
+}
 
 
 //get random house id's for a match
