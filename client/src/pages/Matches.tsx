@@ -1,9 +1,7 @@
-import { Flex, Box, Text, Button } from '@chakra-ui/react'
+import { Flex, Box, Text, Button, Center, Card, Stack, CardFooter, CardBody, Heading, Image, CardHeader} from '@chakra-ui/react'
 
 import React, { useState, useEffect } from 'react';
-import ListOfHouses from '../components/ListOfHouses';
 import CreateMatches from '../components/CreateMatches'
-import ApiTest from '../components/ApiTest';
 
 interface IHouses {
     house_id: number,
@@ -11,7 +9,7 @@ interface IHouses {
     picture: string, 
     price: number,
     elo: number, 
-    percent: boolean,
+    percent: number,
 }
 
 
@@ -36,20 +34,41 @@ export default function Matches() {
 
     const house = houses.map((houses: IHouses)=> {
         return (
-            <div >
-                <ListOfHouses
-                    key={houses.house_id}
-                    {...houses}
-                />
+        <Box bg="white">
+            <Card maxW='960px'  mt="10px">
+                <CardHeader>
+                    <Flex>
+                    <Flex flex='1' gap='4' alignItems='center' flexWrap='wrap'>
+                        <Box>
+                        <Heading size='sm'>{houses.house}</Heading>
+                        <Text>${houses.price}</Text>
+                        </Box>
+                    </Flex>
+                    </Flex>
+                </CardHeader>
+                <Image objectFit='cover' src={houses.picture}/>
+                <CardFooter justify='space-between' flexWrap='wrap'
+                    sx={{
+                    '& > button': {
+                        minW: '136px',
+                    },
+                    }}
+                >
                 <CreateMatches houses={houses}/>
-            </div>
+                </CardFooter>
+            </Card>
+        </Box>
         )
     })
 
     return (
     
         <Box>
-            {house}
+            <Center>
+                <Box>
+                    {house}
+                </Box>
+            </Center>
         </Box>
     )
 }

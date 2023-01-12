@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {baseURL, fetchApi} from '../util/fetchApi'
+import { Box, Button, Card, CardBody, CardFooter, Center, Heading, Stack, Text, Image } from "@chakra-ui/react";
 import ListOfProperties from "../components/ListOfProperties";
 
 
@@ -34,7 +35,7 @@ const InputHouses = () => {
 
 
    useEffect(() => {
-        const propertyForSale = Promise.resolve(fetchApi(`${baseURL}properties/list?locationExternalIDs=5002&purpose=for-sale&hitsPerPage=6`))
+        const propertyForSale = Promise.resolve(fetchApi(`${baseURL}properties/list?locationExternalIDs=5002&purpose=for-sale&hitsPerPage=15`))
 
         propertyForSale.then(
             (res) => {
@@ -45,62 +46,21 @@ const InputHouses = () => {
         )
    }, []);
     
-    const property =  properties.map((item: {title: string, coverPhoto: {url:string}, price:number, id:number})=> {
+    const property = properties.map((item: {title: string, coverPhoto: {url:string}, price:number, id:number})=> {
         return (
-            <div >
-                <ListOfProperties 
-                key={item.id}
-                {...item}
-                />
-                <button onClick={() => {
-                    addHouse(item.title, item.coverPhoto.url, item.price)
-                }}>Add</button>
-            </div>
+            <ListOfProperties key={item.id} {...item} addHouse={addHouse}/>
         )
     })
 
     return (
-        <div>
-            {property}
-        </div>
+        <Box h="100vh">
+            <Center>
+                <Box w="65%">
+                    {property}
+                </Box>
+            </Center>
+        </Box>
     )
 }
 
 export default InputHouses;
-
-
-            
-
-            /*
-HAVE TO ADD CHECK TO SEE IF IT ALREADY EXIST IF IT DOES THEN ERROR MESSAGE HERE
-
-some check like this but if it is equla to okay just say success if not then say it has alrady been added before
-
-
-    if (data.status === "ok") {
-      setClothing((prevClothingData) => {
-        return {
-          ...prevClothingData,
-          userId: data.userId,
-          username: data.username,
-        };
-      });
-
-
-        res.json({ status: 'ok' })
-    } catch (err) {
-        res.json({ status: 'error', error: 'Duplicate username or email' })
-    }
-            
-            console.error(err.message);
-        }
-    }
-    */
-    // return (
-    //     <div>
-    //      //have to map it in later
-    //         <button onClick={() => {
-    //             // addHouse();
-    //         }}>ADD</button>
-    //     </div>
-    // )

@@ -47,6 +47,21 @@ app.get("/houses", async (req, res) => {
     }
 })
 
+//get all houses 
+
+app.get("/houses/sorted", async (req, res) => {
+    try {
+    const houses = await getOrSetCache("houses/sorted", async () => {
+        const allHouses  = await pool.query("SELECT * FROM house ORDER BY elo DESC");
+        return allHouses
+    })
+    res.json(houses.rows)
+    }
+    catch (err) {
+        console.error(err.message);
+    }
+})
+
 //get a house
 
 app.get("/houses/:id", async (req, res) => {
@@ -83,8 +98,8 @@ app.get("/houses/random/:id", async (req, res) => {
 app.put("/matchResult", async (req, res) => {
     try {
         const { firstHouseId, secondHouseId, firstNewElo, secondNewElo, status } = req.body;
-        const firstHousePercent = (((firstNewElo / 1600) - 1) / 3) + 1
-        const secondHousePercent = (((secondNewElo / 1600) - 1) / 3) + 1
+        const firstHousePercent = (firstNewElo / 1600)
+        const secondHousePercent = (secondNewElo / 1600)
 
         const updateFirstHouse = await pool.query("UPDATE house SET elo = $1, percent = $2 WHERE house_id = $3",
             [firstNewElo, firstHousePercent, firstHouseId]);
@@ -117,7 +132,7 @@ app.post("/matches", async (req, res) => {
             (first_house_id, second_house_id, first_old_elo, second_old_elo, first_new_elo, second_new_elo, status) 
             VALUES($1, $2, $3, $4, $5, $6, $7) 
             RETURNING * `,
-            [1, secondHouseId, firstOldElo, secondOldElo, firstNewElo, secondNewElo, status]);
+            [firstHouseId, secondHouseId, firstOldElo, secondOldElo, firstNewElo, secondNewElo, status]);
         res.json(newHouse.rows[0])
     } catch (err) {
         console.error(err.message);
@@ -145,7 +160,7 @@ app.get("/matches/:houseId", async (req, res) => {
     try {
         const { houseId } = req.params
         const matches = await getOrSetCache(`matches:${houseId}`, async () => {
-            const match = await pool.query("SELECT * FROM match WHERE $1 IN(first_house_id, second_house_id)",
+            const match = await pool.query("SELECT * FROM match WHERE $1 IN(first_house_id, second_house_id) ORDER BY match_id DESC",
             [houseId]);
             return match
         })
