@@ -1,4 +1,4 @@
-Website is not hosted due to limited API calls
+Website is not hosted due to limited RAPID-API calls
 
 Real Rate is a website where user's can compare real estate properties and determine their real value.
 This is done through a chess elo algorithm.
