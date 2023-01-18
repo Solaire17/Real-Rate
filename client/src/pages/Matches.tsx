@@ -2,6 +2,7 @@ import { Flex, Box, Text, Center, Card, CardFooter, Heading, Image, CardHeader} 
 import React, { useState, useEffect } from 'react';
 import CreateMatches from '../components/CreateMatches'
 
+//TypeScript Interfaces
 interface IHouses {
     house_id: number,
     house: string,
@@ -10,7 +11,6 @@ interface IHouses {
     elo: number, 
     percent: number,
 }
-
 
 export default function Matches() {
     const [houses, setHouses] = useState([])
