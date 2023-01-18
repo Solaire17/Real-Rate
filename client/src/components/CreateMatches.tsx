@@ -1,10 +1,8 @@
-import { Image, Box, Button, CardFooter, Center, Modal, ModalBody, ModalCloseButton, ModalContent, ModalFooter, ModalHeader, ModalOverlay, Table, TableContainer, Tbody, Td, Text, Th, Thead, Tr, useDisclosure } from "@chakra-ui/react";
-import { match } from "assert";
-import React, { useState, useEffect } from "react";
+import { Image, Box, Button, Center, Modal, ModalBody, ModalCloseButton, ModalContent, ModalHeader, ModalOverlay, Table, TableContainer, Tbody, Td, Th, Thead, Tr, useDisclosure } from "@chakra-ui/react";
+import React, { useState } from "react";
 import getRating from "../util/getRating";
 
-var EloRating = require('elo-rating');
-
+//TypeScript Interfaces
 interface IMatches {
     firstHouseId: number,
     secondHouseId: number,
@@ -14,7 +12,6 @@ interface IMatches {
     secondNewElo: number, 
     status: boolean,
 }
-
 interface IHouses {
     house_id: number,
     house: string,
@@ -25,6 +22,9 @@ interface IHouses {
 }
 
 export default function CreateMatches (props: {houses: IHouses}) {
+    //Chakra UI Modal functions
+    const { isOpen, onOpen, onClose } = useDisclosure()
+
     const [id, setId] = useState(props.houses.house_id)
     const [secondHouseInfo, setSecondHouseInfo] = useState({
         house_id: 0,
@@ -34,7 +34,6 @@ export default function CreateMatches (props: {houses: IHouses}) {
         elo: 0,
         percent: 0
     })
-
     const [match, setMatch] = useState({
         firstHouseId: 0,
         secondHouseId: 0,
@@ -44,13 +43,10 @@ export default function CreateMatches (props: {houses: IHouses}) {
         secondNewElo: 0, 
         status: false
     });
-
     const [result, setResult] = useState()
-
     const [secondHouseElo, setSecondHouseElo] = useState();
 
-
-    //get function 1
+    //GET for the id/elo selected and a random id/elo
     async function getElos(id: number) {
         try {
             const response = await fetch(`http://localhost:5000/houses/${id}`)
@@ -63,7 +59,6 @@ export default function CreateMatches (props: {houses: IHouses}) {
                   firstOldElo: jsonData.elo
                 };
               });
-            console.log(match)
         } catch (err: any) {
             console.error(err.message);
         }
@@ -79,12 +74,12 @@ export default function CreateMatches (props: {houses: IHouses}) {
                 };
               });
               secondhouseInfo(match)
-              console.log(match)
         } catch (err: any) {
             console.error(err.message);
         }
     }
 
+    //GET for the random id/elo data
     async function secondhouseInfo(match: IMatches) {
         try {
             const response = await fetch(`http://localhost:5000/houses/${match.secondHouseId}`)
@@ -99,12 +94,12 @@ export default function CreateMatches (props: {houses: IHouses}) {
                     percent: jsonData.percent
                 }
             })
-            console.log(jsonData)
         } catch (err: any) {
             console.error(err.message);
         }
     }
 
+    //POST for creating a match between the two properties
     async function addMatch() {
         try {
             const body = { match };
@@ -118,10 +113,9 @@ export default function CreateMatches (props: {houses: IHouses}) {
         }
     }
 
+    //Updates match info and calls the POST and PUT function 
     function calculateResult(result: boolean) {
-        console.log(match.firstOldElo, match.secondOldElo)
         var resultInfo = getRating(match.firstOldElo, match.secondOldElo, result);
-        console.log(resultInfo)
         
         setMatch((prevMatchData: IMatches) => {
             return {
@@ -136,6 +130,7 @@ export default function CreateMatches (props: {houses: IHouses}) {
           updateElo();
     }
 
+    //PUT to update the elos of the two properties after a match is decided
     async function updateElo() {
         const { 
             firstHouseId, 
@@ -157,12 +152,12 @@ export default function CreateMatches (props: {houses: IHouses}) {
                 headers: {"Content-Type": "application/json"},
                 body: JSON.stringify(body)
             })
-
         } catch (err: any) {
             console.error(err.message);
         }
     }
-    const { isOpen, onOpen, onClose } = useDisclosure()
+
+    //Modal for the two properties
     function MatchResult () {
         return (
             <>
@@ -170,7 +165,6 @@ export default function CreateMatches (props: {houses: IHouses}) {
                 getElos(id)
                 onOpen()
             }}>Create Match</Button>
-      
       <Modal
         closeOnOverlayClick={false}
         size='full'

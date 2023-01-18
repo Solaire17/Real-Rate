@@ -1,14 +1,10 @@
-import React from "react";
-
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom"
-// import InputTodos from "./components/InputTodos"
-// import ListTodos from "./components/ListTodos"
 import Home from "./pages/Home";
 import InputHouses from "./pages/InputHouses";
 import Matches from "./pages/Matches";
-import MatchInfo from "./components/MatchInfo";
 import LeaderBoard from "./pages/LeaderBoard";
-import { Tabs, TabList, TabPanels, Tab, TabPanel, Box, Link, Heading, HStack, Image } from '@chakra-ui/react'
+import { Tabs, TabList, Tab, Box, Link, Heading, HStack, Image } from '@chakra-ui/react'
 
 function App() {
   return (
@@ -26,7 +22,6 @@ function App() {
                 </Heading>
               </Link>
           </Box>
-          
           <Tabs pl="5px" pr="5px" variant='enclosed' >
             <TabList>
               <Tab >
@@ -48,6 +43,7 @@ function App() {
           </Tabs>
           </HStack>
         </Box>
+
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/AddHouse" element={<InputHouses />} />

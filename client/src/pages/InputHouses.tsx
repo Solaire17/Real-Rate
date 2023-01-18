@@ -1,24 +1,19 @@
 import React, { useState, useEffect } from "react";
 import {baseURL, fetchApi} from '../util/fetchApi'
-import { Box, Button, Card, CardBody, CardFooter, Center, Heading, Stack, Text, Image } from "@chakra-ui/react";
+import { Box, Center} from "@chakra-ui/react";
 import ListOfProperties from "../components/ListOfProperties";
 
 
 const InputHouses = () => {
-
     const [properties, setProperties] = useState([])
-
-    
     const [house, setHouse] = useState({
         title: "",
         picture: "",
         price: 0
     });
 
-
-
+    //Post for houses
     async function addHouse(house: string, picture: string, price: number) {
-        console.log(house)
         try {
             const body = { house, picture, price };
             const response = await fetch("http://localhost:5000/houses", {
@@ -31,21 +26,18 @@ const InputHouses = () => {
         }
     }
 
-
-
-
-   useEffect(() => {
+    //FetchAPI to retrieve property data from RAPIDAPI
+    useEffect(() => {
         const propertyForSale = Promise.resolve(fetchApi(`${baseURL}properties/list?locationExternalIDs=5002&purpose=for-sale&hitsPerPage=15`))
 
         propertyForSale.then(
             (res) => {
-                console.log(res)
-                
                 setProperties(res.hits)
             }
         )
-   }, []);
+    }, []);
     
+    //Mapping properties array
     const property = properties.map((item: {title: string, coverPhoto: {url:string}, price:number, id:number})=> {
         return (
             <ListOfProperties key={item.id} {...item} addHouse={addHouse}/>

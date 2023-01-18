@@ -1,5 +1,5 @@
+import React from 'react';
 import { Box, Card, Image, Stack, CardBody, Heading, Text, CardFooter, Button } from '@chakra-ui/react'
-import React from 'react'
 
 export default function ListOfProperties (props: { coverPhoto: {url: string}, title: string, price: number, addHouse: any}) {
     return (

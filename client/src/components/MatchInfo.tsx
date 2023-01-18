@@ -1,5 +1,5 @@
-import { Flex, Box, Text, Button, Center, TableContainer, Table, Thead, Tr, Th, Tbody, Td, Stat, StatHelpText, StatArrow } from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { Box, Center, TableContainer, Table, Thead, Tr, Th, Tbody, Td, Stat, StatHelpText, StatArrow } from '@chakra-ui/react'
+import React, { useEffect, useState } from 'react'
 
 interface IHouses {
     house_id: number,
@@ -22,14 +22,13 @@ interface IMatches {
 }   
 
 export default function MatchInfo(props: IHouses) {
-
     const [matches, setMatches] = useState([])
 
+    //Get for Matches
     const getMatches = async () => {
         try {
             const response = await fetch(`http://localhost:5000/matches/${props.house_id}`)
             const jsonData = await response.json()
-            console.log(jsonData)
             setMatches(jsonData)
         }
         catch (err: any) {
@@ -40,6 +39,7 @@ export default function MatchInfo(props: IHouses) {
         getMatches();
     },[]);
 
+    //Mapping matches array
     const match = matches.map((matches: IMatches)=> {
         return (    
             <Tbody>

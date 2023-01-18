@@ -5,15 +5,15 @@ const pool = require("./db");
 const Redis = require("redis");
 const { json } = require("express");
 
+//Redis functions and cache expiration
 const redisClient = Redis.createClient()
-
 const EXPIRATION = 3600
 
 app.use(cors());
 app.use(express.json());
 
-//create a house
 
+//Create a house
 app.post("/houses", async (req, res) => {
     const { house, picture, price } = req.body;
     try {
@@ -32,8 +32,7 @@ app.post("/houses", async (req, res) => {
     }
 })
 
-//get all houses
-
+//Get all houses
 app.get("/houses", async (req, res) => {
     try {
     const houses = await getOrSetCache("houses", async () => {
@@ -47,8 +46,7 @@ app.get("/houses", async (req, res) => {
     }
 })
 
-//get all houses 
-
+//Get all houses sorted by highest to lowest elo
 app.get("/houses/sorted", async (req, res) => {
     try {
     const houses = await getOrSetCache("houses/sorted", async () => {
@@ -62,8 +60,7 @@ app.get("/houses/sorted", async (req, res) => {
     }
 })
 
-//get a house
-
+//Get a house using given id
 app.get("/houses/:id", async (req, res) => {
     try {
         const { id } = req.params
@@ -79,8 +76,7 @@ app.get("/houses/:id", async (req, res) => {
     }
 })
 
-//get a random house
-
+//Get a house but not including the given id
 app.get("/houses/random/:id", async (req, res) => {
     try {
         const { id } = req.params
@@ -93,8 +89,7 @@ app.get("/houses/random/:id", async (req, res) => {
     }
 })
 
-//update a house
-
+//Update a house's properties (Elo and Percent)
 app.put("/matchResult", async (req, res) => {
     try {
         const { firstHouseId, secondHouseId, firstNewElo, secondNewElo, status } = req.body;
@@ -103,7 +98,6 @@ app.put("/matchResult", async (req, res) => {
 
         const updateFirstHouse = await pool.query("UPDATE house SET elo = $1, percent = $2 WHERE house_id = $3",
             [firstNewElo, firstHousePercent, firstHouseId]);
-
         const updateSecondHouse = await pool.query("UPDATE house SET elo = $1, percent = $2 WHERE house_id = $3",
             [secondNewElo, secondHousePercent, secondHouseId]);
     }
@@ -115,10 +109,8 @@ app.put("/matchResult", async (req, res) => {
 
 
 
-//create a match
-
+//Create a match
 app.post("/matches", async (req, res) => {
-
     try {
         const { firstHouseId,
             secondHouseId,
@@ -139,8 +131,7 @@ app.post("/matches", async (req, res) => {
     }
 })
 
-//get all matches
-
+//Get all matches
 app.get("/matches", async (req, res) => {
     try {
         const matches = await getOrSetCache("matches", async () => {
@@ -154,8 +145,7 @@ app.get("/matches", async (req, res) => {
         }
 })
 
-//get all matches matching an id
-
+//Get all matches using given house id
 app.get("/matches/:houseId", async (req, res) => {
     try {
         const { houseId } = req.params
@@ -171,8 +161,7 @@ app.get("/matches/:houseId", async (req, res) => {
     }
 })
 
-//Redis Function
-
+//Redis Function for caching new data/ retrieving data
 function getOrSetCache(key, callback) {
     return new Promise((resolve, reject) => {
         redisClient.get(key, async (error, data) => {
@@ -184,9 +173,6 @@ function getOrSetCache(key, callback) {
         })
     })
 }
-
-
-//get random house id's for a match
 
 app.listen(5000, () => {
     console.log("SERVER IS RUNNING on 5000");

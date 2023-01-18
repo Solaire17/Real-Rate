@@ -1,29 +1,8 @@
-import { Flex, Box, Text, Button, Card, CardHeader, Heading, CardBody, Center, IconButton, HStack, Table,
-    Thead,
-    Tbody,
-    Tfoot,
-    Tr,
-    Th,
-    Td,
-    TableCaption,
-    TableContainer,   Stat,
-    StatLabel,
-    StatNumber,
-    StatHelpText,
-    StatArrow,
-    StatGroup,
-    useDisclosure,
-    Modal,
-    ModalOverlay,
-    ModalContent,
-    ModalCloseButton,
-    ModalHeader,
-    ModalBody,
-    ModalFooter,} from '@chakra-ui/react'
-import { useEffect, useState } from 'react'
+import { Box, Text, Center, Table, Td, StatHelpText, Stat, StatArrow, TableContainer, Tbody, Th, Thead, Tr } from '@chakra-ui/react'
+import React, { useEffect, useState } from 'react'
 import LeaderboardModal from '../components/LeaderboardModal'
-import MatchInfo from '../components/MatchInfo'
 
+//TypeScript Interfaces
 interface IHouses {
     house_id: number,
     house: string,
@@ -33,17 +12,14 @@ interface IHouses {
     percent: number,
 }
 
-
 export default function Scoreboard() {
-    
-
     const [leaderboards, setLeaderboards] = useState([])
 
+    //GET for houses and sorted by highest to lowest elo
     const getLeaderboard = async () => {
         try {
             const response = await fetch("http://localhost:5000/houses/sorted")
             const jsonData = await response.json()
-            console.log(jsonData)
             setLeaderboards(jsonData)
         }
         catch (err: any) {
@@ -54,10 +30,9 @@ export default function Scoreboard() {
         getLeaderboard();
     },[]);
 
+    //Mapping leaderboard array
     const leaderboard = leaderboards.map((leaderboards: IHouses, count)=> {
         count++
-        console.log(leaderboards.percent)
-        console.log(leaderboards.percent==0 )
         return (    
             <Tbody>
                 <Tr>
@@ -74,7 +49,6 @@ export default function Scoreboard() {
                         {leaderboards.price}
                     </Td>
                     <Td isNumeric>
-
                         <Stat>
                         <Text fontSize='xm'>{Math.round(leaderboards.price * leaderboards.percent)}</Text>
                             <StatHelpText>
@@ -89,12 +63,8 @@ export default function Scoreboard() {
                     </Td>
                 </Tr>
             </Tbody>
-        )
-        
+        )  
     })
-
-
-
 
     return (
         <Center h="100vh">

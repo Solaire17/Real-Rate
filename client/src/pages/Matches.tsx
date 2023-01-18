@@ -1,5 +1,4 @@
-import { Flex, Box, Text, Button, Center, Card, Stack, CardFooter, CardBody, Heading, Image, CardHeader} from '@chakra-ui/react'
-
+import { Flex, Box, Text, Center, Card, CardFooter, Heading, Image, CardHeader} from '@chakra-ui/react'
 import React, { useState, useEffect } from 'react';
 import CreateMatches from '../components/CreateMatches'
 
@@ -14,14 +13,13 @@ interface IHouses {
 
 
 export default function Matches() {
-
     const [houses, setHouses] = useState([])
 
+    //Get for houses
     const getHouses = async () => {
         try {
             const response = await fetch("http://localhost:5000/houses")
             const jsonData = await response.json()
-            console.log(jsonData)
             setHouses(jsonData)
         }
         catch (err: any) {
@@ -32,6 +30,7 @@ export default function Matches() {
         getHouses();
     },[]);
 
+    //Mapping houses array
     const house = houses.map((houses: IHouses)=> {
         return (
         <Box bg="white">
@@ -62,7 +61,6 @@ export default function Matches() {
     })
 
     return (
-    
         <Box>
             <Center>
                 <Box>
